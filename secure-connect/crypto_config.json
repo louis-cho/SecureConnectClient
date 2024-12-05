@@ -1,0 +1,17 @@
+{
+  "aes": {
+    "algorithm": "AES-GCM",
+    "keyLength": 256,
+    "ivLength": 12
+  },
+  "hmac": {
+    "algorithm": "HMAC",
+    "hash": "SHA-256",
+    "keyLength": 32
+  },
+  "rsa": {
+    "algorithm": "RSA-OAEP",
+    "hash": "SHA-256",
+    "keyLength": 2048
+  }
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="module">
+      import CryptoConfig from "./secure-connect/config/cryptoConfig.js";
+      import CryptoChain from "./secure-connect/security/cryptoChain.js";
+
+      import RSACryptoStrategy from "./secure-connect/security/strategy/asym/rsaCryptoStrategy.js";
+      import AESCryptoStrategy from "./secure-connect/security/strategy/sym/aesCryptoStrategy.js";
+      import HMACCryptoStrategy from "./secure-connect/security/strategy/hash/hmacCryptoStrategy.js";
+
+      import TextUtils from "./secure-connect/util/textUtils.js";
+      // let cryptoConfig = new CryptoConfig(
+      //   "./secure-connect/crypto_config.json"
+      // );
+      // await cryptoConfig.loadConfig();
+
+      // console.log(cryptoConfig.config);
+
+      let cryptoChain = new CryptoChain();
+      console.log(cryptoChain);
+
+      let rsaCryptoStrategy = new RSACryptoStrategy();
+      let aesCryptoStrategy = new AESCryptoStrategy();
+      let hmacCryptoStrategy = new HMACCryptoStrategy();
+      await rsaCryptoStrategy.init();
+      await aesCryptoStrategy.init();
+      console.log(aesCryptoStrategy.key);
+      await hmacCryptoStrategy.init();
+
+      cryptoChain.addCryptoStrategy(rsaCryptoStrategy);
+      cryptoChain.addCryptoStrategy(aesCryptoStrategy);
+      cryptoChain.addHashStrategy(hmacCryptoStrategy);
+
+      let plainText = "Hello, World!";
+
+      let encrypted = await cryptoChain.encrypt(plainText);
+      console.log("encrypted >> " + encrypted);
+
+      let decrypted = await cryptoChain.decrypt(encrypted);
+      let textUtils = new TextUtils();
+      console.log("decrypted >> " + textUtils.decode(decrypted));
+    </script>
+  </body>
+</html>
