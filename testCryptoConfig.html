@@ -15,12 +15,15 @@
       import HMACCryptoStrategy from "./secure-connect/security/strategy/hash/hmacCryptoStrategy.js";
 
       import TextUtils from "./secure-connect/util/textUtils.js";
-      // let cryptoConfig = new CryptoConfig(
-      //   "./secure-connect/crypto_config.json"
-      // );
-      // await cryptoConfig.loadConfig();
+      let cryptoConfig = new CryptoConfig(
+        "./secure-connect/crypto_config.json"
+      );
+      await cryptoConfig.loadConfig();
 
-      // console.log(cryptoConfig.config);
+      console.log(cryptoConfig.config);
+      console.log(cryptoConfig.config.asymmetric);
+      console.log(cryptoConfig.config.symmetric);
+      console.log(cryptoConfig.config.hash);
 
       let cryptoChain = new CryptoChain();
       console.log(cryptoChain);

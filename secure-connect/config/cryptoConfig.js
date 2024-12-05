@@ -13,24 +13,24 @@ export default class CryptoConfig {
     }
   }
 
-  getAESConfig() {
-    if (!this.config || !this.config.aes) {
-      throw new Error("AES Config is not Exist");
+  getSymConfig() {
+    if (!this.config || !this.config["symmetric"]) {
+      throw new Error("Symmetric Config is not Exist");
     }
-    return this.config.aes;
+    return this.config["symmetric"];
   }
 
-  getRSAConfig() {
-    if (!this.config || !this.config.rsa) {
-      throw new Error("RSA Config is not Exist");
+  getAsymConfig() {
+    if (!this.config || !this.config["asymmetric"]) {
+      throw new Error("Asymmetric Config is not Exist");
     }
-    return this.config.rsa;
+    return this.config["asymmetric"];
   }
 
-  getHMACConfig() {
-    if (!this.config || !this.config.hmac) {
-      throw new Error("HMAC Config is not Exist");
+  getHashConfig() {
+    if (!this.config || !this.config["hash"]) {
+      throw new Error("Hash Config is not Exist");
     }
-    return this.config.hmac;
+    return this.config["hash"];
   }
 }
