@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Strategy Test Suite</title>
+  </head>
+  <body>
+    <h1>Crypto Strategy Test Suite</h1>
+    <p>
+      Open the browser console to see the test results for various cryptographic
+      strategies.
+    </p>
+
+    <script type="module">
+      // AES 암호화 테스트
+      import AESCryptoStrategy from "./secure-connect/security/strategy/sym/AESCryptoStrategy.js";
+
+      import HMACStrategy from "./secure-connect/security/strategy/hash/HMACStrategy.js";
+      import MDStrategy from "./secure-connect/security/strategy/hash/MDStrategy.js";
+      import SHAStrategy from "./secure-connect/security/strategy/hash/SHAStrategy.js";
+      import RSACryptoStrategy from "./secure-connect/security/strategy/asym/RSACryptoStrategy.js";
+
+      async function testAESCryptoStrategy() {
+        console.log("Testing AESCryptoStrategy...");
+
+        try {
+          const aesCrypto = new AESCryptoStrategy();
+          const testData = new TextEncoder().encode("Hello, AES Encryption!");
+          await aesCrypto.getKey();
+
+          // 암호화
+          const encryptedData = await aesCrypto.encrypt(testData);
+          const decryptedData = await aesCrypto.decrypt(encryptedData);
+
+          const originalText = new TextDecoder().decode(testData);
+          const decryptedText = new TextDecoder().decode(decryptedData);
+
+          if (decryptedText === originalText) {
+            console.log("AES Encryption/Decryption successful.");
+          } else {
+            console.error("AES Decryption failed.");
+          }
+        } catch (error) {
+          console.error("AES Test failed:", error);
+        }
+      }
+
+      // HMAC 테스트
+      async function testHMACStrategy() {
+        console.log("Testing HMACStrategy...");
+
+        try {
+          const hmacStrategy = new HMACStrategy();
+          await hmacStrategy.init();
+
+          const testData = "Hello, HMAC!";
+          const signature = await hmacStrategy.sign(testData);
+          const isValid = await hmacStrategy.verify(testData, signature);
+
+          if (isValid) {
+            console.log("HMAC Sign/Verify successful.");
+          } else {
+            console.error("HMAC verification failed.");
+          }
+        } catch (error) {
+          console.error("HMAC Test failed:", error);
+        }
+      }
+
+      /*
+      // MD5 해시 테스트
+      async function testMDStrategy() {
+        console.log("Testing MDStrategy...");
+
+        try {
+          const mdStrategy = new MDStrategy();
+          const testData = "Hello, MD5!";
+          const hash = await mdStrategy.hash(testData);
+
+          // MD5 해시 값 비교
+          const isValid = await mdStrategy.verify(testData, hash);
+          if (isValid) {
+            console.log("MD5 Hash successful.");
+          } else {
+            console.error("MD5 Hash verification failed.");
+          }
+        } catch (error) {
+          console.error("MD5 Test failed:", error);
+        }
+      }
+      */
+
+      // SHA 해시 테스트
+      async function testSHAStrategy() {
+        console.log("Testing SHAStrategy...");
+
+        try {
+          const shaStrategy = new SHAStrategy();
+          const testData = "Hello, SHA-256!";
+          const hash = await shaStrategy.hash(testData);
+
+          const isValid = await shaStrategy.verify(testData, hash);
+          if (isValid) {
+            console.log("SHA-256 Hash successful.");
+          } else {
+            console.error("SHA-256 Hash verification failed.");
+          }
+        } catch (error) {
+          console.error("SHA-256 Test failed:", error);
+        }
+      }
+
+      // RSA 암호화 테스트
+      async function testRSACryptoStrategy() {
+        console.log("Testing RSACryptoStrategy...");
+
+        try {
+          const rsaCrypto = new RSACryptoStrategy();
+          await rsaCrypto.init();
+
+          const testData = "Hello, RSA!";
+          const encryptedData = await rsaCrypto.encrypt(testData);
+          const decryptedData = await rsaCrypto.decrypt(encryptedData);
+
+          // 복호화된 데이터 디코딩
+          const decodedData = new TextDecoder().decode(decryptedData);
+
+          if (decodedData === testData) {
+            console.log("RSA Encryption/Decryption successful.");
+          } else {
+            console.error("RSA Decryption failed.");
+          }
+        } catch (error) {
+          console.error("RSA Test failed:", error);
+        }
+      }
+
+      // 모든 테스트 실행
+      async function runTests() {
+        await testAESCryptoStrategy();
+        await testHMACStrategy();
+        // await testMDStrategy();
+        await testSHAStrategy();
+        await testRSACryptoStrategy();
+      }
+
+      // 자동 실행
+      runTests();
+    </script>
+  </body>
+</html>

@@ -1,52 +1,51 @@
-import CryptoStrategy from "../hashStrategy.js";
 import TextUtils from "../../../util/textUtils.js";
 import HMACKeyGenerator from "../../generator/hash/hmacKeyGenerator.js";
+import HashStrategy from "./hashStrategy.js";
 
-export default class HMACCryptoStrategy extends CryptoStrategy {
+export default class HMACStrategy extends HashStrategy {
   constructor() {
     super();
 
-    if (HMACCryptoStrategy.instance) {
-      return HMACCryptoStrategy.instance;
+    if (HMACStrategy.instance) {
+      return HMACStrategy.instance;
     }
 
     this.textUtils = new TextUtils();
     this.keyGenerator = new HMACKeyGenerator();
 
-    HMACCryptoStrategy.instance = this;
+    HMACStrategy.instance = this;
   }
 
   async init() {
     this.key = await this.keyGenerator.generateKey();
-    this.signature = null;
   }
 
-  async encrypt(data) {
+  async sign(data) {
     if (this.key == null) {
       return null;
     }
 
-    const encodedData = this.textUtils.encodedData;
+    const encodedData = this.textUtils.encode(data);
     const signature = await crypto.subtle.sign(
       { name: "HMAC" },
-      this.cryptoKey,
+      this.key,
       encodedData
     );
 
-    this.signature = new Uint8Array(signature);
-    return this.signature;
+    let signatureByteArray = new Uint8Array(signature);
+    return signatureByteArray;
   }
 
-  async decrypt(data) {
+  async verify(data, hash) {
     if (this.key == null) {
       return null;
     }
 
-    const encodedData = this.textUtils.encodedData(data);
+    const encodedData = this.textUtils.encode(data);
     const isValid = await crypto.subtle.verify(
       { name: "HMAC" },
-      this.cryptoKey,
-      this.signature,
+      this.key,
+      hash,
       encodedData
     );
 

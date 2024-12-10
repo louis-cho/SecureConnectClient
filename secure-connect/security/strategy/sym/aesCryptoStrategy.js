@@ -1,7 +1,7 @@
 import TextUtils from "../../../util/textUtils.js";
-import CryptoStrategy from "../cryptoStrategy.js";
+import SymCryptoStrategy from "./symCryptoStrategy.js";
 
-export default class AESCryptoStrategy extends CryptoStrategy {
+export default class AESCryptoStrategy extends SymCryptoStrategy {
   constructor() {
     super();
 
@@ -16,11 +16,7 @@ export default class AESCryptoStrategy extends CryptoStrategy {
     AESCryptoStrategy.instance = this;
   }
 
-  async init() {
-    await this.generateKey();
-  }
-
-  async generateKey() {
+  async getKey() {
     const key = await crypto.subtle.generateKey(
       {
         name: "AES-GCM",
@@ -31,6 +27,8 @@ export default class AESCryptoStrategy extends CryptoStrategy {
     );
 
     this.key = key;
+
+    return this.key;
   }
 
   async encrypt(data) {
