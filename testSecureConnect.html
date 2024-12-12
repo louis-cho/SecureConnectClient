@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Connect Client Test</title>
+  </head>
+  <body>
+    <h1>Secure Connect Test Suite</h1>
+    <p>
+      Open the browser console to see the test results for the server-client
+      encryption and decryption process.
+    </p>
+
+    <script>
+      const serverUrl = "http://localhost:8080";
+
+      async function fetchKeys() {
+        const response = await fetch(`${serverUrl}/keys`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch keys from server");
+        }
+        return response.json();
+      }
+
+      // Fetch configuration from the server
+      async function fetchConfig() {
+        const response = await fetch(`${serverUrl}/config`);
+        if (!response.ok)
+          throw new Error("Failed to fetch configuration from server");
+        return response.json();
+      }
+
+      // Fetch keys from the server
+      async function encryptWithAES(data, aesKey, config) {
+        const aesAlgorithm = config["crypto.aes.algorithm"];
+        const ivLength = parseInt(config["crypto.aes.ivLength"], 10);
+        const algorithmName = convertAlgorithmName(aesAlgorithm);
+
+        const aesKeyBytes = Uint8Array.from(atob(aesKey), (c) =>
+          c.charCodeAt(0)
+        );
+        const cryptoKey = await crypto.subtle.importKey(
+          "raw",
+          aesKeyBytes,
+          { name: algorithmName },
+          false,
+          ["encrypt"]
+        );
+
+        const iv = crypto.getRandomValues(new Uint8Array(ivLength / 8));
+        const encryptedData = await crypto.subtle.encrypt(
+          { name: algorithmName, iv },
+          cryptoKey,
+          new TextEncoder().encode(data)
+        );
+
+        return {
+          encrypted: btoa(
+            String.fromCharCode(...new Uint8Array(encryptedData))
+          ),
+          iv: btoa(String.fromCharCode(...iv)),
+        };
+      }
+
+      // Java 스타일의 알고리즘 이름을 Web Crypto API 형식으로 변환하는 함수
+      function convertAlgorithmName(algorithm) {
+        if (algorithm.includes("GCM")) {
+          return "AES-GCM"; // Java의 AES/GCM/NoPadding -> AES-GCM
+        }
+        if (algorithm.includes("CBC")) {
+          return "AES-CBC"; // Java의 AES/CBC/PKCS5Padding -> AES-CBC
+        }
+        if (algorithm.includes("CTR")) {
+          return "AES-CTR"; // Java의 AES/CTR/NoPadding -> AES-CTR
+        }
+        throw new Error(`Unsupported algorithm: ${algorithm}`);
+      }
+
+      // Main test process
+      async function runTest() {
+        try {
+          console.log("Fetching configuration from the server...");
+          const config = await fetchConfig();
+          console.log("Configuration:", config);
+
+          console.log("Fetching keys from the server...");
+          const keys = await fetchKeys();
+          console.log("Keys:", keys);
+
+          const plainText = "Hello, Secure World!";
+          console.log("Original Text:", plainText);
+
+          console.log("Encrypting data with AES...");
+          const { encrypted, iv } = await encryptWithAES(
+            plainText,
+            keys.AES,
+            config
+          );
+          console.log("Encrypted Data:", encrypted);
+          console.log("IV:", iv);
+
+          console.log("Sending encrypted data to the server...");
+          const response = await fetch(`${serverUrl}/decrypt`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ encrypted, iv }),
+          });
+
+          if (!response.ok) {
+            console.error(
+              "Server response not OK:",
+              response.status,
+              response.statusText
+            );
+            throw new Error("Failed to decrypt data on the server");
+          }
+
+          const decryptedText = await response.text();
+          console.log("Decrypted Text from Server:", decryptedText);
+
+          if (plainText === decryptedText) {
+            console.log(
+              "Test Passed: Encryption and Decryption are successful!"
+            );
+          } else {
+            console.error(
+              "Test Failed: Decrypted text does not match the original text."
+            );
+          }
+        } catch (error) {
+          console.error("Error during test execution:", error.message);
+        }
+      }
+
+      // Run the test automatically
+      runTest();
+    </script>
+  </body>
+</html>
